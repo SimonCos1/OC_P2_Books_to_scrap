@@ -3,21 +3,12 @@ from bs4 import BeautifulSoup, element
 import csv
 
 URL = "http://books.toscrape.com/"
-CATEGORY = "http://books.toscrape.com/catalogue/category/books/sequential-art_5/index.html" #75 books
-#CATEGORY = "http://books.toscrape.com/catalogue/category/books/travel_2/index.html" #11 books, 1 page
+#CATEGORY = "http://books.toscrape.com/catalogue/category/books/sequential-art_5/index.html" #75 books
+CATEGORY = "http://books.toscrape.com/catalogue/category/books/travel_2/index.html" #11 books, 1 page
 
 def cleanning_title(title):
     # This function is for cleanning the title for just keeping a string
     return " ".join(title.split())
-
-def generate_csv(category, books_datas):
-    # This function is for generating the CSV with 1 book datas
-    labels = ["product_page_url", "title", "category", "image_url", "product_descritpion", "review_rating", "UPC", "Price (excl. tax)", 
-            "Price (incl. tax)", "number_available"]
-    with open(f"{category}.csv", "w", newline="") as f:
-        writer = csv.writer(f)
-        writer.writerow(labels)
-        writer.writerows(books_datas)
        
 
 def generate_soup(url):
@@ -26,12 +17,27 @@ def generate_soup(url):
     return BeautifulSoup(get_text, "html.parser")
 
 
+def generate_csv(category, books_datas):
+    # This function is for generating the CSV with 1 book datas
+    labels = ["product_page_url", "title", "category", "image_url", "product_descritpion", "review_rating", "UPC", "Price (excl. tax)", 
+            "Price (incl. tax)", "number_available"]
+    
+    category = category.replace(" ", "_")
+    with open(f"/home/simon/Documents/{category}.csv", "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(labels)
+        for one_book_datas in books_datas:
+            writer.writerow(one_book_datas)
+
+    print("CSV généré")
+
 def get_products_urls(category):
     # This function get each product's page url for a book category
     books_urls_from_a_category = []
     url_prefix = URL + "catalogue/"
     i = 1
     while True:
+        #On passe sur sur la première page
         soup = generate_soup(category)
         # après <h3>, on clible <a href> et on récupère le lien de la page du livre
         h3s = soup.findAll("h3")
@@ -39,7 +45,7 @@ def get_products_urls(category):
             books_urls_from_a_category.append(h3.findNext(href=True).get("href").replace("../../../", url_prefix))
 
         # Gestion de la pagination pour les categories de plus d'une page de livres
-        if soup.findAll("a")[-1].text == "next":   #### mettre en l100
+        if soup.findAll("a")[-1].text == "next":
             next_btn = soup.select("a")[-1]['href']
             print("next_btn : " + str(next_btn))
             i += 1
@@ -50,7 +56,7 @@ def get_products_urls(category):
                 category = category.replace(f"page-{i-1}.html", f"page-{i}.html")
         else:
             break
-
+    print("Nombre de livres traités : " + str(len(books_urls_from_a_category)))
     return books_urls_from_a_category
 
 
@@ -73,11 +79,10 @@ def get_books_datas(category):
         values_list.append(soup.findAll("td")[5].text) #number_available
         books_datas.append(values_list)
         values_list = []
-        
     category = str(soup.findAll("a")[3].text)
-    generate_csv(category, books_datas)
 
+    generate_csv(category, books_datas) ### GENERATE A DEPLACER DANS PROCHAINE FONCTION
 
-
+    return(category, books_datas)
 
 get_books_datas(CATEGORY)
