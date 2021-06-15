@@ -1,5 +1,5 @@
 import requests
-from bs4 import BeautifulSoup, element
+from bs4 import BeautifulSoup
 import csv
 
 URL = "http://books.toscrape.com/"
@@ -28,8 +28,8 @@ def generate_csv(category, books_datas):
         writer.writerow(labels)
         for one_book_datas in books_datas:
             writer.writerow(one_book_datas)
-
     print("CSV généré")
+
 
 def get_products_urls(category):
     # This function get each product's page url for a book category
@@ -85,4 +85,19 @@ def get_books_datas(category):
 
     return(category, books_datas)
 
-get_books_datas(CATEGORY)
+
+def complete_extract(URL):
+    # extract categories' URLs
+    categories_urls = []
+    soup = generate_soup(URL).find("div", {"class": "side_categories"})
+    categories_partial_links = soup.findAll("a", href=True)
+    for a in categories_partial_links:
+        categories_urls.append(URL + str(a.get("href")))
+    categories_urls = categories_urls[1:]
+    print("Nombre de catégories traitées : " + str(len(categories_urls)))
+    
+    for category in categories_urls:
+        get_books_datas(category)
+
+
+complete_extract(URL)
