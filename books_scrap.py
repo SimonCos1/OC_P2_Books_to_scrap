@@ -37,7 +37,7 @@ def get_products_urls(category):
     url_prefix = URL + "catalogue/"
     i = 1
     while True:
-        #On passe sur sur la première page
+        # On passe sur sur la première page
         soup = generate_soup(category)
         # après <h3>, on clible <a href> et on récupère le lien de la page du livre
         h3s = soup.findAll("h3")
@@ -61,7 +61,7 @@ def get_products_urls(category):
 
 
 def get_books_datas(category):
-    #extrait les données de chaque livre puis génération d'un csv
+    # Extrait les données de chaque livre puis génération d'un csv
     books_urls_from_a_category = get_products_urls(category)
     books_datas = []
     values_list = []
