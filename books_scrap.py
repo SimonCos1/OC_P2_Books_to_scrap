@@ -4,13 +4,13 @@ import csv
 import os
 
 URL = "http://books.toscrape.com/"
-#CATEGORY = "http://books.toscrape.com/catalogue/category/books/sequential-art_5/index.html" #75 books
-#CATEGORY = "http://books.toscrape.com/catalogue/category/books/travel_2/index.html" #11 books, 1 page
 
 def cleanning_title(title):
     # This function is for cleanning the title for just keeping a string
-    return " ".join(title.split())
-       
+    title = " ".join(title.split())
+    title = title.replace(" | Books to Scrape - Sandbox", "")
+    return title.replace("/", "|")   
+
 
 def generate_soup(url):
     get_url = requests.get(url)
@@ -24,12 +24,12 @@ def generate_csv(category, books_datas):
             "Price (incl. tax)", "number_available"]
     category = category.replace(" ", "_")
     folder_path = create_folder("CSV_extracted")
+    
     with open(os.path.join(folder_path, f"{category}.csv"), "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(labels)
         for one_book_datas in books_datas:
             writer.writerow(one_book_datas)
-
     print(f"CSV {category} généré")
     print("==============================")
 
@@ -58,7 +58,7 @@ def get_products_urls(category):
                 category = category.replace(f"page-{i-1}.html", f"page-{i}.html")
         else:
             break
-    print("Nombre de catégories de livres trouvées : " + str(len(books_urls_from_a_category)))
+    print("Nombre de livres trouvées : " + str(len(books_urls_from_a_category)))
     return books_urls_from_a_category
 
 
@@ -72,11 +72,22 @@ def get_books_datas(category):
         # product_page_url
         values_list.append(book_url)
         # title
-        values_list.append(cleanning_title(str(soup.title.text)))
+        title = cleanning_title(str(soup.title.text))
+        values_list.append(title)
         # category
-        values_list.append(str(soup.findAll("a")[3].text))
+        category = str(soup.findAll("a")[3].text)
+        values_list.append(category)
         # image_url
-        values_list.append(soup.find("img").get("src").replace("../../", URL))
+        image_url = soup.find("img").get("src").replace("../../", URL)
+        values_list.append(image_url)
+        # Téléchargement de l'image du livre
+        all_images_path = create_folder("books_images_extracted")
+        images_category_path = os.path.join(all_images_path, category)
+        os.makedirs(images_category_path, exist_ok=True)
+        save_image_path = os.path.join(images_category_path, f"{title}.jpg")
+        r = requests.get(image_url)
+        with open(save_image_path, "wb") as f:
+            f.write(r.content)
         # product_description
         values_list.append(str(soup.findAll("p")[3].text))
         #review_rating : on récupère l'info dans l'attribut class du paragraphe
@@ -89,20 +100,19 @@ def get_books_datas(category):
         values_list.append(soup.findAll("td")[3].text[1:])
         # number_available
         values_list.append(soup.findAll("td")[5].text)
-        books_datas.append(values_list)
+        books_datas.append(values_list[:])
         values_list.clear()
-
     category = str(soup.findAll("a")[3].text)
     return(category, books_datas)
 
 
-def create_folder(repository):
+def create_folder(new_repository):
     # This function create needed repository (on the current folder) and return the folder's path
     current_folder = os.path.dirname(__file__)
-    new_folder = os.path.join(current_folder, repository)
+    new_folder = os.path.join(current_folder, new_repository)
     os.makedirs(new_folder, exist_ok=True)
     return new_folder
-    
+
 
 def complete_extract(URL):
     # main function - Scrap the website
