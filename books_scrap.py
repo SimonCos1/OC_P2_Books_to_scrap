@@ -5,22 +5,43 @@ import os
 
 URL = "http://books.toscrape.com/"
 
+
 def cleanning_title(title):
-    # This function is for cleanning the title for just keeping a string
+    """Cette fonction permet de récuéprer le titre nettoyé des espaces et sauts de lignes superflus.
+
+    Args:
+        title (str): titre d'un livre
+
+    Returns:
+        str: Titre retourné sous forme de chaîne de carractère
+    """
     title = " ".join(title.split())
     title = title.replace(" | Books to Scrape - Sandbox", "")
     return title.replace("/", "|")   
 
 
 def generate_soup(url):
+    """Cette fonction génère une soupe du contenu de la page fournie en URL.
+
+    Args:
+        url (str): url utilisée par BeautifulSoup pour générer le soupe de la page
+
+    Returns:
+        class 'bs4.BeautifulSoup': contient tous les objets extraits de la page.
+    """
     get_url = requests.get(url)
     get_text = get_url.text
     return BeautifulSoup(get_text, "html.parser")
 
 
 def generate_csv(category, books_datas):
-    # This function is for generating the CSV with book datas.
-    labels = ["product_page_url", "title", "category", "image_url", "product_descritpion", "review_rating", "UPC", "Price (excl. tax)", 
+    """Cette fonction permet de génrérer un CSV contenant les données des livres d'une catégorie.
+
+    Args:
+        category (str): Nom de la catégorie traitée qui servira au nommage du fichier CSV.
+        books_datas (list): Contient les nformations des différents livres de la catégorie
+    """
+    labels = ["product_page_url", "title", "category", "image_url", "product_description", "review_rating", "UPC", "Price (excl. tax)", 
             "Price (incl. tax)", "number_available"]
     category = category.replace(" ", "_")
     folder_path = create_folder("CSV_extracted")
@@ -35,13 +56,21 @@ def generate_csv(category, books_datas):
 
 
 def get_products_urls(category):
-    # This function get each product's page url for a book category
+    """Cette fonction récupère chaque URL de page produit pour une catégorie donnée (avec gestion de la pagination si la catégorie contient beaucoup de produits.)
+
+    Args:
+        category (str): catégorie pour laquelle on va récupérer toutes les URL des pages produits. 
+
+    Returns:
+        list: Liste contenant toutes les URLS des produits de la catégorie 
+    """
     books_urls_from_a_category = []
     url_prefix = URL + "catalogue/"
     i = 1
     while True:
         # On passe sur sur la première page
         soup = generate_soup(category)
+        
         # après <h3>, on clible <a href> et on récupère le lien de la page du livre
         h3s = soup.findAll("h3")
         for h3 in h3s:
@@ -63,7 +92,15 @@ def get_products_urls(category):
 
 
 def get_books_datas(category):
-    # Extract datas for each book page.
+    """Extrait les informations souhaitées de chaque livre à partir de sa page produit.
+
+    Args:
+        category (str): Nom de la catégorie ciblée pour la récupération des informations des livres.
+    
+    Returns:
+        category (str): Nom de la catégorie traitée.
+        books_datas (list): liste de listes contenant toutes les infomations extraites pour chaque livre.
+    """
     books_urls_from_a_category = get_products_urls(category)
     books_datas = []
     values_list = []
@@ -107,7 +144,14 @@ def get_books_datas(category):
 
 
 def create_folder(new_repository):
-    # This function create needed repository (on the current folder) and return the folder's path
+    """Cette fonction crée les répertoires nécessaires (sur le répertoire courant) pour le stockage des informations sur l'ordinateur (CSV, images)
+
+    Args:
+        new_repository (str): Nom du nouveau répertoire à créer.
+
+    Returns:
+        str: Chemin complet du nouveau répertoire créé.
+    """
     current_folder = os.path.dirname(__file__)
     new_folder = os.path.join(current_folder, new_repository)
     os.makedirs(new_folder, exist_ok=True)
@@ -115,7 +159,11 @@ def create_folder(new_repository):
 
 
 def complete_extract(URL):
-    # main function - Scrap the website
+    """Fonction "main". Lance le scraping du site ciblé.
+
+    Args:
+        URL (str): URL du site à scraper.
+    """
     categories_urls = []
     soup = generate_soup(URL).find("div", {"class": "side_categories"})
     categories_partial_links = soup.findAll("a", href=True)
