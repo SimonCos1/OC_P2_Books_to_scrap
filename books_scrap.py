@@ -7,7 +7,7 @@ URL = "http://books.toscrape.com/"
 
 
 def cleanning_title(title):
-    """Cette fonction permet de récuéprer le titre nettoyé des espaces et sauts de lignes superflus.
+    """Cette fonction permet de récupérer le titre nettoyé des espaces et sauts de lignes superflus.
 
     Args:
         title (str): titre d'un livre
@@ -17,7 +17,7 @@ def cleanning_title(title):
     """
     title = " ".join(title.split())
     title = title.replace(" | Books to Scrape - Sandbox", "")
-    return title.replace("/", "|")   
+    return title.replace("/", "|")
 
 
 def generate_soup(url):
@@ -41,11 +41,22 @@ def generate_csv(category, books_datas):
         category (str): Nom de la catégorie traitée qui servira au nommage du fichier CSV.
         books_datas (list): Contient les nformations des différents livres de la catégorie
     """
-    labels = ["product_page_url", "title", "category", "image_url", "product_description", "review_rating", "UPC", "Price (excl. tax)", 
-            "Price (incl. tax)", "number_available"]
+    labels = [
+        "product_page_url",
+        "title",
+        "category",
+        "image_url",
+        "product_description",
+        "review_rating",
+        "UPC",
+        "Price (excl. tax)",
+        "Price (incl. tax)",
+        "number_available",
+    ]
+
     category = category.replace(" ", "_")
     folder_path = create_folder("CSV_extracted")
-    
+
     with open(os.path.join(folder_path, f"{category}.csv"), "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(labels)
@@ -56,13 +67,14 @@ def generate_csv(category, books_datas):
 
 
 def get_products_urls(category):
-    """Cette fonction récupère chaque URL de page produit pour une catégorie donnée (avec gestion de la pagination si la catégorie contient beaucoup de produits.)
+    """Cette fonction récupère chaque URL de page produit pour une catégorie donnée (avec gestion
+    de la pagination si la catégorie contient beaucoup de produits.)
 
     Args:
-        category (str): catégorie pour laquelle on va récupérer toutes les URL des pages produits. 
+        category (str): catégorie pour laquelle on va récupérer toutes les URL des pages produits.
 
     Returns:
-        list: Liste contenant toutes les URLS des produits de la catégorie 
+        list: Liste contenant toutes les URLS des produits de la catégorie
     """
     books_urls_from_a_category = []
     url_prefix = URL + "catalogue/"
@@ -70,15 +82,17 @@ def get_products_urls(category):
     while True:
         # On passe sur sur la première page
         soup = generate_soup(category)
-        
+
         # après <h3>, on clible <a href> et on récupère le lien de la page du livre
         h3s = soup.findAll("h3")
         for h3 in h3s:
-            books_urls_from_a_category.append(h3.findNext(href=True).get("href").replace("../../../", url_prefix))
+            books_urls_from_a_category.append(
+                h3.findNext(href=True).get("href").replace("../../../", url_prefix)
+            )
 
         # Gestion de la pagination pour les categories de plus d'une page de livres
         if soup.findAll("a")[-1].text == "next":
-            next_btn = soup.select("a")[-1]['href']
+            next_btn = soup.select("a")[-1]["href"]
             print("next_btn : " + str(next_btn))
             i += 1
             if next_btn == "page-2.html":
@@ -96,7 +110,7 @@ def get_books_datas(category):
 
     Args:
         category (str): Nom de la catégorie ciblée pour la récupération des informations des livres.
-    
+
     Returns:
         category (str): Nom de la catégorie traitée.
         books_datas (list): liste de listes contenant toutes les infomations extraites pour chaque livre.
@@ -127,8 +141,8 @@ def get_books_datas(category):
             f.write(r.content)
         # product_description
         values_list.append(str(soup.findAll("p")[3].text))
-        #review_rating : on récupère l'info dans l'attribut class du paragraphe
-        values_list.append(soup.find("p", {"class" : "star-rating"}).get("class")[1])
+        # review_rating : on récupère l'info dans l'attribut class du paragraphe
+        values_list.append(soup.find("p", {"class": "star-rating"}).get("class")[1])
         # UPC
         values_list.append(soup.findAll("td")[0].text)
         # Price (excl. tax)
@@ -140,11 +154,12 @@ def get_books_datas(category):
         books_datas.append(values_list[:])
         values_list.clear()
     category = str(soup.findAll("a")[3].text)
-    return(category, books_datas)
+    return (category, books_datas)
 
 
 def create_folder(new_repository):
-    """Cette fonction crée les répertoires nécessaires (sur le répertoire courant) pour le stockage des informations sur l'ordinateur (CSV, images)
+    """Cette fonction crée les répertoires nécessaires (sur le répertoire courant) pour
+    le stockage des informations sur l'ordinateur (CSV, images)
 
     Args:
         new_repository (str): Nom du nouveau répertoire à créer.
@@ -172,7 +187,7 @@ def complete_extract(URL):
     # The first list's item isn't a valid category
     categories_urls = categories_urls[1:]
     print("Nombre de catégories traitées : " + str(len(categories_urls)))
-    
+
     for category in categories_urls:
         one_category_of_books, books_datas = get_books_datas(category)
         generate_csv(one_category_of_books, books_datas)
