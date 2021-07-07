@@ -6,16 +6,16 @@
 ## Description
 Projet réalisé dans le cadre de la formation _**Développeur d'Applications Python**_ d'OpenClassrooms.
 
-Ce programme permet de scrapper et récupérer les données des fiches produits d'un site de vente en ligne de livres. 
-Le programme va récupérer l'ensemble des catégories de livres et pour chacune d'entre elles effectuer les opérations suivantes : 
+Ce programme permet de scrapper et récupérer les données des fiches produits d'un site de vente de livres. 
+Le programme va récupérer l'ensemble des catégories de livres et pour chacune d'entre elles, effectuer les opérations suivantes : 
 
-- Parcourir les pages produits des livres puis en extraire les données pour les enregistrer dans un fichier CSV (1 par catégorie) 
+- Parcourir les pages produits des livres, puis en extraire les données pour les enregistrer dans un fichier CSV (1 par catégorie) 
 - Extraire les images des produits. 
-- Si les répertoires pour sotcker les images et les CSV sont inexistants, ils les crées. 
+- Si les répertoires pour sotcker les images et les CSV sont inexistants, il les crées. 
 
 _Note :_ Ce code est optimisé pour un seul site. Il faudra donc l'adapter à vos besoins si vous souhaitez l'utiliser sur un autre site marchand. 
 
-##Installation
+## Installation
 
 ### Pré-requis
 Les pré-requis pour exécuter ce code vous aurez besoin à minima de : 
@@ -26,7 +26,7 @@ Les pré-requis pour exécuter ce code vous aurez besoin à minima de :
 
 ### Installation (Linux Ubuntu)
 - Cloner ce repository.
-- Déplacer vous dans le répertoire cloné (_OC_P2_Books_to_scrap_).
+- Déplacez vous dans le répertoire cloné (_OC_P2_Books_to_scrap_).
 - Créer un nouvel environnement virtuel : ``python3 -m venv OC_P2_Books_to_scrap_env``
 - Sourcer le nouveau venv : ``source OC_P2_Books_to_scrap_env/bin/activate``
 - Installer les modules nécessaires : ``pip install -r requirements.txt``
@@ -35,7 +35,7 @@ Les pré-requis pour exécuter ce code vous aurez besoin à minima de :
 ### Démarrage
 Le programme se compose d'un seul script Python : _books_scrap.py_
 
-Pour exécuter le script, ouvrez un Terminal puis excutez simplement  le script python avec la commande : ``python3 books_scrap.py``
+Pour exécuter le script, ouvrez un Terminal puis excutez simplement  le script avec la commande : ``python3 books_scrap.py``
 
 ## Fabriqué avec
 * [Visual Studio Code](https://code.visualstudio.com/) - Editeur de code.
